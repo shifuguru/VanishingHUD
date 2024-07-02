@@ -34,11 +34,9 @@ Once in-game summon the VanishingHUD menu by:
 * [.NET 4.8 Framework]
 * [C# Language]
 
-## Versioning
+# Version History
 
-Current Progress: 
-
-// Version 1.6 
+### Version 1.6 - Current Progress: 
 ```
 Set Large Map from Online: // Function.Call(Hash.SET_BIGMAP_ACTIVE, true, false);
 
@@ -48,15 +46,15 @@ Detect Interiors: // Function.Call(Hash.IS_INTERIOR_SCENE());
 
 TODO: Fix Phone is Open only when in First Person.. Phone detection not working in 3rd person... 
 ```
-Releases: 
 
-// Version 1.5
+
+### Version 1.5
 ```
 Disabled phone controls while LemonMenu open. 
 ```
 
 
-// Version 1.4 
+### Version 1.4 
 ```
 Fixed "Mod Enabled" menu button, now properly restores radar after disabling mod. 
 
@@ -65,12 +63,12 @@ Added Wanted Radar - Enable Radar while wanted.
 Added Phone Radar - Enable Radar while holding Phone.
 ```
  
-// Version 1.3.1 
+### Version 1.3.1 
 ```
 Hot-fix of Contact text showing as "{ModVersion}", should have had $ infront of string
 ```
 
-// Version 1.3
+### Version 1.3
 ```
 All waypoint types now included 
 
