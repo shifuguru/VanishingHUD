@@ -3,20 +3,17 @@ Current Progress:
 
 // Version 1.6 
 
-// Function.Call(Hash.SET_BIGMAP_ACTIVE, true, false);
+Set Large Map from Online: // Function.Call(Hash.SET_BIGMAP_ACTIVE, true, false);
 
-// Function.Call(Hash.SET_RADAR_ZOOM, 6000);
+Set Zoom Levels: // Function.Call(Hash.SET_RADAR_ZOOM, 6000);
 
-// RADAR ZOOM 
+Detect Interiors: // Function.Call(Hash.IS_INTERIOR_SCENE());
 
-// Function.Call(Hash.IS_INTERIOR_SCENE());
-
+TODO: Fix Phone is Open only when in First Person.. Phone detection not working in 3rd person... 
 
 Releases: 
 
 // Version 1.5
-
-// TODO: Fix Phone is Open only when in First Person.. Phone detection not working in 3rd person... 
 
 // Find out why this mod's LemonUI menu allows the phone controls to be disabled
 
