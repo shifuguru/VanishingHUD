@@ -40,8 +40,8 @@ namespace VanishingHUD
     public class VanishingHUD : Script
     {
         // Pre-Settings:
-        public static string ModName = "Vanishing HUD";
-        public static string ModVersion = "V1.5";
+        public static string modName = "Vanishing HUD";
+        public static string modVer = "Version 1.6a";
 
         public static ScriptSettings settings; // Settings .ini for the mod 
         public static int timerStartTime; // Time when the Script was Loaded/Start countdown to hide radar
@@ -52,6 +52,7 @@ namespace VanishingHUD
 
         public static bool modEnabled; // is Mod Enabled 
         public static bool debugEnabled; // is Debug Enabled 
+
         public static bool radarVisible; // Is Radar currently visible 
         public static bool bigMapEnabled;
         public static bool radarZoomEnabled;
@@ -66,19 +67,12 @@ namespace VanishingHUD
 
         // Options: 
         public static bool footRadarEnabled; // Enable On Foot Radar
-
         public static bool vehicleRadarEnabled; // Enable Vehicle Radar
-
         public static bool waypointRadarEnabled; // Enable Waypoint Radar 
         public static bool waypointActive; // Is Player's Waypoint active
         public static bool objectiveWaypointActive; // Are any other waypoints active
-
         public static bool missionRadarEnabled; // Enable Mission Radar
-        //private bool missionActive; // Is Mission Active 
-
         public static bool phoneRadarEnabled; // Enable Phone Radar 
-        //private bool phoneActive; // Is Player currently using the mobile phone 
-
         public static bool wantedRadarEnabled; // Enabled Radar during police chases
         public static bool playerWanted; // Is Player currently wanted by police
 
@@ -86,7 +80,10 @@ namespace VanishingHUD
 
         // Menu
         private static readonly ObjectPool pool = new ObjectPool();
-        private static readonly NativeMenu menu = new NativeMenu("VanishingHUD", " ", " ");
+        private static readonly NativeMenu menu = new NativeMenu($"{modName}", $"{modVer}", " ");
+        // Main Toggles: 
+        private static readonly NativeCheckboxItem ModToggleMenuItem = new NativeCheckboxItem("Mod Enabled: ", "Enables/Disables the Mod.", modEnabled);
+        private static readonly NativeCheckboxItem DebugToggleMenuItem = new NativeCheckboxItem("Debug Enabled: ", "Enables Debug Notifications. Recommended: False", debugEnabled);
         // Show Duration
         public NativeDynamicItem<int> ShowDurationDynamicMenuItem = new NativeDynamicItem<int>("Show Duration: ", "Time in seconds before hiding the Radar, 0-60 seconds", 10);
         // Map State
@@ -94,9 +91,6 @@ namespace VanishingHUD
         private static readonly NativeDynamicItem<int> VehicleMapZoomLevelDynamicMenuItem = new NativeDynamicItem<int>("Vehicle Map Zoom Level: ", "Sets the Radar Zoom Level.", vehicleZoom);
         private static readonly NativeDynamicItem<int> BuildingMapZoomLevelDynamicMenuItem = new NativeDynamicItem<int>("In Building Map Zoom Level: ", "Sets the Radar Zoom Level.", inBuildingZoom);
         private static readonly NativeDynamicItem<int> BigMapZoomLevelDynamicMenuItem = new NativeDynamicItem<int>("Big Map Zoom Level: ", "Sets the Radar Zoom Level.", bigMapZoom);
-        // Main Toggles: 
-        private static readonly NativeCheckboxItem ModToggleMenuItem = new NativeCheckboxItem("Mod Enabled: ", "Enables/Disables the Mod.", modEnabled);
-        private static readonly NativeCheckboxItem DebugToggleMenuItem = new NativeCheckboxItem("Debug Enabled: ", "Enables Debug Notifications. Recommended: False", debugEnabled);
         // Toggles: 
         private static readonly NativeCheckboxItem BigMapToggleMenuItem = new NativeCheckboxItem("Big Map Enabled: ", "Enables the Big Map from GTA:O.", bigMapEnabled);
         private static readonly NativeCheckboxItem WaypointRadarToggleMenuItem = new NativeCheckboxItem("Waypoint Radar Enabled: ", "Enables Radar while you have a Waypoint. Also works on foot with active waypoint. Recommended: True", waypointRadarEnabled);
@@ -158,7 +152,7 @@ namespace VanishingHUD
 
             // Finished Loading 
             if (debugEnabled)
-                Notification.Show($"Loaded {ModName} : {ModVersion}", true);
+                Notification.Show($"Loaded {modName} : {modVer}", true);
         }
         public static void SaveSettings()
         {
