@@ -11,7 +11,9 @@ using System.Windows.Forms;
 
 namespace VanishingHUD
 {
-    // Version 1.6 
+    // Version 1.6a
+    // Removed Phone method
+    // Fixed issue relating to Minimap showing after pressing 's', was to do with the Phone method, which didn't even work. Gone. 
     // Function.Call(Hash.SET_BIGMAP_ACTIVE, true, false);
     // Function.Call(Hash.SET_RADAR_ZOOM, 6000);
     // RADAR ZOOM 
@@ -47,7 +49,7 @@ namespace VanishingHUD
         public static int timerStartTime; // Time when the Script was Loaded/Start countdown to hide radar
 
         public static Keys menuToggleKey = Keys.J; // Shows mod menu 
-        public static Keys radarToggleKey; // Shows Radar/Delay Countdown Timer (if active) 
+        public static Keys radarToggleKey = Keys.Z; // Shows Radar/Delay Countdown Timer (if active) 
         public static Keys radarCycleKey;
 
         public static bool modEnabled; // is Mod Enabled 
@@ -92,7 +94,7 @@ namespace VanishingHUD
         private static readonly NativeDynamicItem<int> BuildingMapZoomLevelDynamicMenuItem = new NativeDynamicItem<int>("In Building Map Zoom Level: ", "Sets the Radar Zoom Level.", inBuildingZoom);
         private static readonly NativeDynamicItem<int> BigMapZoomLevelDynamicMenuItem = new NativeDynamicItem<int>("Big Map Zoom Level: ", "Sets the Radar Zoom Level.", bigMapZoom);
         // Toggles: 
-        private static readonly NativeCheckboxItem BigMapToggleMenuItem = new NativeCheckboxItem("Big Map Enabled: ", "Enables the Big Map from GTA:O.", bigMapEnabled);
+        private static readonly NativeCheckboxItem BigMapToggleMenuItem = new NativeCheckboxItem("Big Map Enabled: ", "Enables the Big Map from GTA: Online", bigMapEnabled);
         private static readonly NativeCheckboxItem WaypointRadarToggleMenuItem = new NativeCheckboxItem("Waypoint Radar Enabled: ", "Enables Radar while you have a Waypoint. Also works on foot with active waypoint. Recommended: True", waypointRadarEnabled);
         private static readonly NativeCheckboxItem FootRadarToggleMenuItem = new NativeCheckboxItem("Pedestrian Radar Enabled: ", "Enables Radar while on Foot. Recommended: False", footRadarEnabled);
         private static readonly NativeCheckboxItem VehicleRadarToggleMenuItem = new NativeCheckboxItem("Vehicle Radar Enabled: ", "Enables Radar while in any Vehicle. Recommended: True", vehicleRadarEnabled);
@@ -286,8 +288,6 @@ namespace VanishingHUD
             
             if (menu.Visible) // DISABLE CONTROLS WHILE MENU IS OPEN
             {
-                /// Game.DisableControlThisFrame(GTA.Control.VehicleAccelerate);
-                // Game.DisableControlThisFrame(GTA.Control.VehicleBrake);
                 Game.DisableControlThisFrame(GTA.Control.VehicleDuck);
                 Game.DisableControlThisFrame(GTA.Control.VehicleHeadlight);
                 Game.DisableControlThisFrame(GTA.Control.VehicleRadioWheel);
@@ -333,7 +333,16 @@ namespace VanishingHUD
         {
             try
             {
+                pool.RefreshAll();
 
+                if (Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON, true))
+                {
+                    showRadar();
+                }
+                else
+                {
+                    hideRadar();
+                }
             }
             catch
             {
@@ -412,14 +421,6 @@ namespace VanishingHUD
                     showRadar();
                 }
             }
-            if (e.KeyCode == radarCycleKey)
-            {
-                if (modEnabled)
-                {
-                    // ++mapZoomLevel;
-                    // UpdateMapState();
-                }
-            }
         }
         #endregion
         // UPDATE EVENTS  
@@ -432,9 +433,7 @@ namespace VanishingHUD
             UpdateWaypointRadar();
             UpdateFootRadar();
             UpdateVehicleRadar();
-            UpdatePhoneRadar();
             UpdateWantedRadar();
-            // UpdateMissionRadar();
         }
         // SHOW RADAR
         // Command to Show Radar immediately
@@ -545,23 +544,6 @@ namespace VanishingHUD
 
                 if (inVeh)
                 {
-                    showRadar();
-                }
-            }
-        }
-
-        // UPDATE PHONE RADAR
-        private void UpdatePhoneRadar()
-        {
-            // float animTime;
-            if (phoneRadarEnabled)
-            {
-                if (Function.Call<bool>(Hash.IS_PLAYING_PHONE_GESTURE_ANIM, Game.Player.Character))
-                {
-                    if (debugEnabled)
-                    {
-                        Notification.Show("Phone is open.");
-                    }
                     showRadar();
                 }
             }
@@ -816,31 +798,32 @@ namespace VanishingHUD
         public static void UpdateBuildingMapZoom(object sender, ItemChangedEventArgs<int> e)
         {
             inBuildingZoom = e.Object;
-            int maxZoom = 5000;
+            int maxZoom = 1400;
             int minZoom = 0;
-            int increment = 0; // Reset increment 
+            int increment = 25; // Init increment 
+
+            if (inBuildingZoom <= 25)
+            {
+                increment = 1;
+            }
 
             // Determine the increment based on the menu direction
             if (e.Direction == Direction.Left)
             {
-                increment = -50;
+                increment = -increment;
             }
-            else if (e.Direction == Direction.Right)
+
+            inBuildingZoom += increment;
+
+            if (inBuildingZoom > maxZoom)
             {
-                increment = 50;
+                inBuildingZoom = minZoom + (inBuildingZoom - maxZoom - increment);
             }
-
-            int range = maxZoom - minZoom;
-            inBuildingZoom = (inBuildingZoom + increment - minZoom + range) % range + minZoom;
-
-            if (inBuildingZoom < minZoom)
+            else if (inBuildingZoom < minZoom)
             {
                 inBuildingZoom = maxZoom;
             }
-            else if (inBuildingZoom > maxZoom)
-            {
-                inBuildingZoom = minZoom;
-            }
+
             e.Object = inBuildingZoom;
             SaveSettings();
 
