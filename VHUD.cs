@@ -12,6 +12,8 @@ using System.Windows.Forms;
 
 namespace VanishingHUD
 {
+    // Version 1.6
+    // Simplified OnTick method
     // Version 1.6a
     // Removed Phone method
     // Fixed issue relating to Minimap showing after pressing 's', was to do with the Phone method, which didn't even work. Gone. 
@@ -292,12 +294,16 @@ namespace VanishingHUD
                 Game.DisableControlThisFrame(GTA.Control.VehicleFlyAttack);
             }
 
-            if (!modEnabled) return;
+            if (!modEnabled) 
+            {
+                ResetRadar();
+                return;
+            }
             
             // D-Pad Down check: 
             if (Game.IsControlJustPressed(GTA.Control.MultiplayerInfo))
             {
-                showRadar();
+                ShowRadar();
             }
             
             if (radarVisible)
@@ -332,14 +338,7 @@ namespace VanishingHUD
             {
                 pool.RefreshAll();
 
-                if (Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON, true))
-                {
-                    showRadar();
-                }
-                else
-                {
-                    hideRadar();
-                }
+                ResetRadar();
             }
             catch
             {
@@ -415,7 +414,7 @@ namespace VanishingHUD
             {
                 if (modEnabled)
                 {
-                    showRadar();
+                    ShowRadar();
                 }
             }
         }
@@ -435,7 +434,7 @@ namespace VanishingHUD
         }
         // SHOW RADAR
         // Command to Show Radar immediately
-        private void showRadar()
+        private void ShowRadar()
         {
             if (Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON))
             {
@@ -446,13 +445,26 @@ namespace VanishingHUD
         }
         // HIDE RADAR
         // Command to begin Countdown Timer and to Hide Radar when Timer reaches 0 seconds
-        private void hideRadar()
+        private void HideRadar()
         {
             if (radarVisible)
             {
                 Function.Call(Hash.DISPLAY_RADAR, false);
                 // if (hideHUD) {Function.Call(Hash.HIDE_HUD_AND_RADAR_THIS_FRAME);}
                 radarVisible = false;
+            }
+        }
+
+        private void ResetRadar()
+        {
+            if (!radarVisible)
+            {
+                if (Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON))
+                {
+                    Function.Call(Hash.DISPLAY_RADAR, true);
+                    radarVisible = true;
+                }
+                timerStartTime = 0;
             }
         }
         
@@ -479,7 +491,7 @@ namespace VanishingHUD
             {
                 // Hide Radar here,
                 // All other methods conditionally Show Radar
-                hideRadar();
+                HideRadar();
                 timerStartTime = 0;
             }
         }
@@ -512,7 +524,7 @@ namespace VanishingHUD
                 // Show/Hide Radar, to test player waypoint remove 'wapointActive'
                 if (waypointActive)
                 {
-                    showRadar();
+                    ShowRadar();
                 }
             }
         }
@@ -526,7 +538,7 @@ namespace VanishingHUD
 
                 if (onFoot)
                 {
-                    showRadar();
+                    ShowRadar();
                 }
             }
         }
@@ -540,7 +552,7 @@ namespace VanishingHUD
 
                 if (inVeh)
                 {
-                    showRadar();
+                    ShowRadar();
                 }
             }
         }
@@ -552,7 +564,7 @@ namespace VanishingHUD
             {
                 if (Game.Player.WantedLevel > 0)
                 {
-                    showRadar();
+                    ShowRadar();
                 }
             }
         }
