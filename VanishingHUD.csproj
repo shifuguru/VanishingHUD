@@ -83,4 +83,8 @@
     <Content Include="shifuguru.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /Y "$(TargetDir)$(TargetFileName)" "C:\Program Files\Rockstar Games\Grand Theft Auto V\scripts"
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

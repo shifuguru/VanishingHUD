@@ -1,7 +1,8 @@
 ﻿using GTA;
-using GTA.Native;
-using GTA.Math;
 using GTA.UI;
+using GTA.Math;
+using GTA.Native;
+using Screen = GTA.UI.Screen;
 using LemonUI;
 using LemonUI.Menus;
 using iFruitAddon2;
@@ -14,6 +15,7 @@ namespace VanishingHUD
     // Version 1.6a
     // Removed Phone method
     // Fixed issue relating to Minimap showing after pressing 's', was to do with the Phone method, which didn't even work. Gone. 
+    // Hm, guess not. It wasn't responsible for the 's' key bug... 
     // Function.Call(Hash.SET_BIGMAP_ACTIVE, true, false);
     // Function.Call(Hash.SET_RADAR_ZOOM, 6000);
     // RADAR ZOOM 
@@ -74,7 +76,6 @@ namespace VanishingHUD
         public static bool waypointActive; // Is Player's Waypoint active
         public static bool objectiveWaypointActive; // Are any other waypoints active
         public static bool missionRadarEnabled; // Enable Mission Radar
-        public static bool phoneRadarEnabled; // Enable Phone Radar 
         public static bool wantedRadarEnabled; // Enabled Radar during police chases
         public static bool playerWanted; // Is Player currently wanted by police
 
@@ -98,7 +99,6 @@ namespace VanishingHUD
         private static readonly NativeCheckboxItem WaypointRadarToggleMenuItem = new NativeCheckboxItem("Waypoint Radar Enabled: ", "Enables Radar while you have a Waypoint. Also works on foot with active waypoint. Recommended: True", waypointRadarEnabled);
         private static readonly NativeCheckboxItem FootRadarToggleMenuItem = new NativeCheckboxItem("Pedestrian Radar Enabled: ", "Enables Radar while on Foot. Recommended: False", footRadarEnabled);
         private static readonly NativeCheckboxItem VehicleRadarToggleMenuItem = new NativeCheckboxItem("Vehicle Radar Enabled: ", "Enables Radar while in any Vehicle. Recommended: True", vehicleRadarEnabled);
-        private static readonly NativeCheckboxItem PhoneRadarToggleMenuItem = new NativeCheckboxItem("Phone Radar Enabled: ", "Enables Radar while phone is open. Recommended: False", phoneRadarEnabled);
         private static readonly NativeCheckboxItem WantedRadarToggleMenuItem = new NativeCheckboxItem("Wanted Radar Enabled: ", "Enables Radar while police are actively searching for you. Recommended: True", wantedRadarEnabled);
         private static readonly NativeCheckboxItem MissionRadarToggleMenuItem = new NativeCheckboxItem("Mission Radar Enabled: ", "Enables Radar during Missions. Recommended: True", missionRadarEnabled);
 
@@ -138,7 +138,6 @@ namespace VanishingHUD
             footRadarEnabled = settings.GetValue<bool>("Options", "FOOT RADAR ENABLED", false);
             vehicleRadarEnabled = settings.GetValue<bool>("Options", "VEHICLE RADAR ENABLED", true);
             waypointRadarEnabled = settings.GetValue<bool>("Options", "WAYPOINT RADAR ENABLED", true);
-            phoneRadarEnabled = settings.GetValue<bool>("Options", "PHONE RADAR ENABLED", false);
             wantedRadarEnabled = settings.GetValue<bool>("Options", "WANTED RADAR ENABLED", true);
             //isMissionRadarEnabled = settings.GetValue<bool>("Options", "MISSION RADAR ENABLED", true);
 
@@ -168,7 +167,6 @@ namespace VanishingHUD
             settings.SetValue<bool>("Options", "FOOT RADAR ENABLED", footRadarEnabled);
             settings.SetValue<bool>("Options", "VEHICLE RADAR ENABLED", vehicleRadarEnabled);
             settings.SetValue<bool>("Options", "MISSION RADAR ENABLED", missionRadarEnabled);
-            settings.SetValue<bool>("Options", "PHONE RADAR ENABLED", phoneRadarEnabled);
             settings.SetValue<int>("Options", "SHOW DURATION", showDuration);
             settings.SetValue<bool>("Options", "BIG MAP ENABLED", bigMapEnabled);
             settings.SetValue<int>("Options", "BIG MAP ZOOM LEVEL", bigMapZoom);
@@ -191,7 +189,6 @@ namespace VanishingHUD
             menu.Add(WaypointRadarToggleMenuItem);
             menu.Add(FootRadarToggleMenuItem);
             menu.Add(VehicleRadarToggleMenuItem);
-            menu.Add(PhoneRadarToggleMenuItem);
             //menu.Add(MissionRadarToggleMenuItem);
             menu.Add(WantedRadarToggleMenuItem);
             menu.Add(ShowDurationDynamicMenuItem);
@@ -207,7 +204,6 @@ namespace VanishingHUD
             WaypointRadarToggleMenuItem.Activated += ToggleWaypointRadar;
             FootRadarToggleMenuItem.Activated += ToggleFootRadar;
             VehicleRadarToggleMenuItem.Activated += ToggleVehicleRadar;
-            PhoneRadarToggleMenuItem.Activated += TogglePhoneRadar;
             MissionRadarToggleMenuItem.Activated += ToggleMissionRadar;
             WantedRadarToggleMenuItem.Activated += ToggleWantedRadar;
             // Show Duration 
@@ -223,7 +219,6 @@ namespace VanishingHUD
             WaypointRadarToggleMenuItem.Checked = waypointRadarEnabled;
             FootRadarToggleMenuItem.Checked = footRadarEnabled;
             VehicleRadarToggleMenuItem.Checked = vehicleRadarEnabled;
-            PhoneRadarToggleMenuItem.Checked = phoneRadarEnabled;
             WantedRadarToggleMenuItem.Checked = wantedRadarEnabled;
             //MissionRadarToggleMenuItem.Checked = missionRadarEnabled;
             ShowDurationDynamicMenuItem.SelectedItem = showDuration;
@@ -296,25 +291,26 @@ namespace VanishingHUD
                 Game.DisableControlThisFrame(GTA.Control.VehicleSelectPrevWeapon);
                 Game.DisableControlThisFrame(GTA.Control.VehicleFlyAttack);
             }
+
+            if (!modEnabled) return;
             
-            if (modEnabled)
+            // D-Pad Down check: 
+            if (Game.IsControlJustPressed(GTA.Control.MultiplayerInfo))
             {
-                if (radarVisible)
-                {
-                    TimerCountdown();
-                    RadarZoomUpdate();
-                }
-
-                UpdateRadar();
-
-                // D-Pad Down check: 
-                if (Game.IsControlJustPressed(GTA.Control.ScriptPadDown))
-                {
-                    showRadar();
-                }
+                showRadar();
             }
+            
+            if (radarVisible)
+            {
+                TimerCountdown();
+                RadarZoomUpdate();
+            }
+
+            UpdateRadar();
+
+            /*
             // RESET RADAR VISIBILTY
-            else if (!modEnabled)
+            else
             {
                 if (Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON, true))
                 {
@@ -325,6 +321,7 @@ namespace VanishingHUD
                     hideRadar();
                 }
             }
+            */
         }
         #endregion
 
@@ -346,7 +343,7 @@ namespace VanishingHUD
             }
             catch
             {
-
+                
             }
         }
         #endregion
@@ -358,10 +355,10 @@ namespace VanishingHUD
             
             if (debugEnabled)
             {
-                GTA.UI.Screen.ShowSubtitle($"Interior?: {isInBuilding}", 400);
+                Screen.ShowSubtitle($"Interior?: {isInBuilding}", 400);
             }
 
-            int currentZoom = 0;
+            int currentZoom;
 
             if (!isInBuilding)
             {
@@ -423,10 +420,11 @@ namespace VanishingHUD
             }
         }
         #endregion
-        // UPDATE EVENTS  
+        
+        // UPDATE EVENTS
         //
 
-        // UPDATE RADAR 
+        // UPDATE RADAR
         // Tick Event to determine Radar Visibility
         private void UpdateRadar()
         {
@@ -439,22 +437,22 @@ namespace VanishingHUD
         // Command to Show Radar immediately
         private void showRadar()
         {
-            Function.Call(Hash.DISPLAY_RADAR, true);
-            radarVisible = true;
+            if (Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON))
+            {
+                Function.Call(Hash.DISPLAY_RADAR, true);
+                radarVisible = true;
+            }
             timerStartTime = Game.GameTime;
         }
         // HIDE RADAR
         // Command to begin Countdown Timer and to Hide Radar when Timer reaches 0 seconds
         private void hideRadar()
         {
-            if (modEnabled)
+            if (radarVisible)
             {
-                if (showTimeRemaining <= 0)
-                {
-                    Function.Call(Hash.DISPLAY_RADAR, false);
-                    // if (hideHUD) {Function.Call(Hash.HIDE_HUD_AND_RADAR_THIS_FRAME);}
-                    radarVisible = false;
-                }
+                Function.Call(Hash.DISPLAY_RADAR, false);
+                // if (hideHUD) {Function.Call(Hash.HIDE_HUD_AND_RADAR_THIS_FRAME);}
+                radarVisible = false;
             }
         }
         
@@ -491,11 +489,9 @@ namespace VanishingHUD
         {
             if (waypointRadarEnabled)
             {
-                // Reset active blips
-                // objectiveWaypointActive = false;
-                // Get Array of All Blips on Map 
+                // OBJECTIVE WAYPOINT ACTIVE:
                 Blip[] ActiveBlips = World.GetAllBlips();
-
+                // Get Array of All Blips on Map
                 foreach (var Blip in ActiveBlips)
                 {
                     // Stops foreach once it finds an existing Blip with a GPS route 
@@ -556,16 +552,10 @@ namespace VanishingHUD
             {
                 if (Game.Player.WantedLevel > 0)
                 {
-                    if (debugEnabled)
-                    {
-                        Notification.Show("Police are searching for you.");
-                    }
                     showRadar();
                 }
             }
         }
-
-
 
         // TOGGLES 
         private void ToggleMod(object sender, EventArgs e)
@@ -587,7 +577,7 @@ namespace VanishingHUD
         {
             bigMapEnabled = !bigMapEnabled;
             BigMapToggleMenuItem.Checked = bigMapEnabled;
-
+            SaveSettings();
             if (bigMapEnabled)
                 Function.Call(Hash.SET_BIGMAP_ACTIVE, true, false);
             else
@@ -595,68 +585,51 @@ namespace VanishingHUD
 
             if (debugEnabled)
                 Notification.Show($"Big Map Enabled: {bigMapEnabled}");
-
-            SaveSettings();
         }
         private void ToggleWaypointRadar(object sender, EventArgs e)
         {
             waypointRadarEnabled = !waypointRadarEnabled;
             WaypointRadarToggleMenuItem.Checked = waypointRadarEnabled;
-            if (debugEnabled)
-            { 
-                Notification.Show($"Waypoint Radar Enabled: {waypointRadarEnabled}", false); 
-            }
             SaveSettings();
+
+            if (debugEnabled)
+                Notification.Show($"Waypoint Radar Enabled: {waypointRadarEnabled}", false);
         }
         private void ToggleFootRadar(object sender, EventArgs e)
         {
             footRadarEnabled = !footRadarEnabled;
             FootRadarToggleMenuItem.Checked = footRadarEnabled;
-            if (debugEnabled)
-            { 
-                Notification.Show($"Foot Radar Enabled: {footRadarEnabled}", false); 
-            }
             SaveSettings();
+
+            if (debugEnabled)
+                Notification.Show($"Foot Radar Enabled: {footRadarEnabled}", false);
         }
         private void ToggleVehicleRadar(object sender, EventArgs e)
         {
             vehicleRadarEnabled = !vehicleRadarEnabled;
             VehicleRadarToggleMenuItem.Checked = vehicleRadarEnabled;
-            if (debugEnabled)
-            { 
-                Notification.Show($"Vehicle Radar Enabled: {vehicleRadarEnabled}", false); 
-            }
             SaveSettings();
+
+            if (debugEnabled)
+                Notification.Show($"Vehicle Radar Enabled: {vehicleRadarEnabled}", false);
         }
         private void ToggleMissionRadar(object sender, EventArgs e)
         {
             missionRadarEnabled = !missionRadarEnabled;
             MissionRadarToggleMenuItem.Checked = missionRadarEnabled;
+            SaveSettings();
+
             if (debugEnabled)
-            {
                 Notification.Show($"Mission Radar Enabled: {missionRadarEnabled}", false);
-            }
-            SaveSettings();
-        }
-        private void TogglePhoneRadar(object sender, EventArgs e)
-        {
-            phoneRadarEnabled = !phoneRadarEnabled;
-            PhoneRadarToggleMenuItem.Checked = phoneRadarEnabled;
-            if (debugEnabled)
-            {
-                Notification.Show($"Phone Radar Enabled: {phoneRadarEnabled}", false);
-            }
-            SaveSettings();
         }
         private void ToggleWantedRadar(object sender, EventArgs e)
         {
             wantedRadarEnabled = !wantedRadarEnabled;
             WantedRadarToggleMenuItem.Checked = wantedRadarEnabled;
+            SaveSettings();
 
             if (debugEnabled)
                 Notification.Show($"Wanted Radar Enabled: {wantedRadarEnabled}");
-
-            SaveSettings();
         }
         
         // Show Duration:
@@ -730,16 +703,12 @@ namespace VanishingHUD
             onFootZoom = e.Object;
             int maxZoom = 1410;
             int minZoom = 840;
-            int increment = 0; // Reset increment 
+            int increment = 10; // Reset increment 
 
             // Determine the increment based on the menu direction
             if (e.Direction == Direction.Left)
             {
                 increment = -10;
-            }
-            else if (e.Direction == Direction.Right)
-            {
-                increment = 10;
             }
 
             int range = maxZoom - minZoom;
@@ -759,7 +728,6 @@ namespace VanishingHUD
             SaveSettings();
 
             // e.Object = ChangeMenuItem(currentZoom, increment, minZoom, maxZoom);
-            
         }
 
         public static void UpdateVehicleMapZoom(object sender, ItemChangedEventArgs<int> e)
@@ -789,6 +757,7 @@ namespace VanishingHUD
             {
                 vehicleZoom = minZoom;
             }
+
             e.Object = vehicleZoom;
             SaveSettings();
 
@@ -830,22 +799,22 @@ namespace VanishingHUD
             // e.Object = ChangeMenuItem(currentZoom, increment, minZoom, maxZoom);
         }
 
-        public static int ChangeMenuItem(int currentZoom, int increment, int minZoom, int maxZoom)
+        public static int ChangeMenuItem(int current, int increment, int min, int max)
         {
-            int range = maxZoom - minZoom;
-            currentZoom = (currentZoom + increment - minZoom + range) % range + minZoom;
+            int range = max - min;
+            current = (current + increment - min + range) % range + min;
 
-            if (currentZoom < minZoom)
+            if (current < min)
             {
-                currentZoom = maxZoom;
+                current = max;
             }
-            else if (currentZoom > maxZoom)
+            else if (current > max)
             {
-                currentZoom = minZoom;
+                current = min;
             }
             
             SaveSettings();
-            return currentZoom;
+            return current;
         }
     }
 }
